@@ -10,6 +10,7 @@ namespace CountdownTimer
     class Program
     {
         private static int remainingTime;
+        public static Timer oneSecondElapsed;
 
         static void Main(string[] args)
         {
@@ -24,7 +25,7 @@ namespace CountdownTimer
 
             // Create a timer that will trigger an event every 1000 ms.
             const int MILLISEC_PER_SEC = 1000;
-            Timer oneSecondElapsed = new Timer(MILLISEC_PER_SEC);
+            oneSecondElapsed = new Timer(MILLISEC_PER_SEC);
 
             // Hook up elapsed event timer
             oneSecondElapsed.Elapsed += EventHandler;
@@ -34,7 +35,35 @@ namespace CountdownTimer
             oneSecondElapsed.Enabled = true;
 
             // Allow user to end timer prematurely by pressing enter.
-            Console.ReadLine();
+            while (remainingTime > 0)
+            {
+                string userInput = Console.ReadLine();
+                if (userInput.Length > 0 && userInput.ToLower()[0] == 'q')
+                {
+                    break;
+                }
+                else
+                {
+                    oneSecondElapsed.Enabled = !oneSecondElapsed.Enabled;
+                    UpdateScreen();
+                    Console.Write("Press Enter key to {0}.", oneSecondElapsed.Enabled ? "pause" : "resume");
+                }
+            }
+
+            // Cleanup
+            oneSecondElapsed.Stop();
+            oneSecondElapsed.Dispose();
+            UpdateScreen();
+
+        }
+
+        static void EventHandler(Object source, ElapsedEventArgs e)
+        {
+
+            remainingTime--;
+            UpdateScreen();
+
+            Console.Write("Press Enter key to pause.");
 
         }
 
@@ -53,15 +82,7 @@ namespace CountdownTimer
 
         }
 
-        static void EventHandler(Object source, ElapsedEventArgs e)
-        {
 
-            remainingTime--;
-            UpdateScreen();
-
-            Console.Write("Press Enter key to stop countdown.");
-
-        }
 
         static void UpdateScreen()
         {
@@ -113,6 +134,11 @@ namespace CountdownTimer
             for (int i = 0; i < ART_ROWS; i++)
             {
                 Console.WriteLine(timeArt[i]);
+            }
+
+            if (remainingTime == 0)
+            {
+                oneSecondElapsed.Stop();
             }
 
         }
